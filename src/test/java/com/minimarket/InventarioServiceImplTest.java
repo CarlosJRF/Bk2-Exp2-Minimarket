@@ -40,7 +40,7 @@ public class InventarioServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        // Arrange (Preparar): Configuramos los datos simulados
+        // Configuramos los datos simulados
         producto = new Producto();
         producto.setId(10L);
         producto.setNombre("Galletas de Avena");
@@ -55,27 +55,24 @@ public class InventarioServiceImplTest {
 
     @Test
     void testGuardarInventarioAislado() {
-        // Concepto 3: Stubbing (Comportamiento preprogramado)
-        // Resumen: Le decimos al Mock que cuando reciba CUALQUIER objeto Inventario para guardar, 
+        // Le decimos al Mock que cuando reciba CUALQUIER objeto Inventario para guardar, 
         // devuelva nuestra variable 'inventario' creada en el setUp().
         when(inventarioRepository.save(any(Inventario.class))).thenReturn(inventario);
 
-        // Act (Actuar): Llamamos al método del SERVICIO (la clase real)
+        //Llamamos al método del SERVICIO (la clase real)
         Inventario inventarioGuardado = inventarioService.save(inventario);
 
-        // Assert (Afirmar): Validamos las reglas de negocio solicitadas
-        // 1. Validamos que los campos exigidos no sean nulos
+        // Validamos que los campos exigidos no sean nulos
         assertNotNull(inventarioGuardado, "El inventario guardado no debe ser nulo");
         assertNotNull(inventarioGuardado.getTipoMovimiento(), "El campo tipoMovimiento no puede ser nulo");
         assertNotNull(inventarioGuardado.getCantidad(), "El campo cantidad no puede ser nulo");
         
-        // 2. Validamos la relación correcta Producto-Inventario
+        // Validamos la relación correcta Producto-Inventario
         assertEquals(10L, inventarioGuardado.getProducto().getId(), "El ID del producto en el inventario debe coincidir");
         assertEquals("Entrada", inventarioGuardado.getTipoMovimiento(), "El tipo de movimiento debe ser 'Entrada'");
         assertEquals(100, inventarioGuardado.getCantidad(), "La cantidad registrada debe ser 100");
 
-        // Concepto 4: Verificación
-        // Resumen: Comprobamos que el servicio intentó guardar en la base de datos exactamente 1 vez.
+        // Comprobamos que el servicio intentó guardar en la base de datos exactamente 1 vez.
         verify(inventarioRepository, times(1)).save(inventario);
     }
 }
