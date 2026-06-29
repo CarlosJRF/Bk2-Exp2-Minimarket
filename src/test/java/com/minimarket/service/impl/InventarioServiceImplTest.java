@@ -1,4 +1,4 @@
-package com.minimarket;
+package com.minimarket.service.impl;
 
 // Importaciones de JUnit 5 y aserciones
 import static org.junit.jupiter.api.Assertions.*;

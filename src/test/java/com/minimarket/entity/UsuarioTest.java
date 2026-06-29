@@ -1,4 +1,4 @@
-package com.minimarket;
+package com.minimarket.entity;
 
 import com.minimarket.entity.Rol;
 import com.minimarket.entity.Usuario;

@@ -1,4 +1,4 @@
-package com.minimarket;
+package com.minimarket.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.minimarket.controller.CarritoController;

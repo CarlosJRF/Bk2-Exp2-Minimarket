@@ -36,7 +36,5 @@ public class Categoria {
         return productos;
     }
 
-    public void setProductos(List<Producto> productos) {
-        this.productos = productos;
-    }
+    
 }

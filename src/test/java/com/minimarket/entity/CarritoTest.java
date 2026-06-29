@@ -1,4 +1,4 @@
-package com.minimarket;
+package com.minimarket.entity;
 
 
 // Importaciones de JUnit 5
