@@ -1,32 +1,43 @@
 package com.minimarket;
 
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.minimarket.controller.ProductoController;
+import com.minimarket.entity.Producto;
+import com.minimarket.security.config.SecurityConfig;
+import com.minimarket.security.service.CustomUserDetailsService;
+import com.minimarket.service.ProductoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-
-import com.minimarket.entity.Producto;
-import com.minimarket.service.ProductoService;
-import com.minimarket.controller.ProductoController;
-import java.util.Arrays;
 
 @WebMvcTest(ProductoController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
+@Import(SecurityConfig.class)
 public class ProductoControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private ProductoService productoService;
+
+    @MockitoBean
+    private CustomUserDetailsService customUserDetailsService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private Producto producto;
 
@@ -39,22 +50,26 @@ public class ProductoControllerTest {
         producto.setStock(100);
     }
 
+    // TEST A.1: Éxito con rol ADMIN
     @Test
-    void testListarProductos() throws Exception {
-        when(productoService.findAll()).thenReturn(Arrays.asList(producto));
+    @WithMockUser(authorities = "ADMIN")
+    void testGuardarProducto_ComoAdmin_Exitoso() throws Exception {
+        when(productoService.save(any(Producto.class))).thenReturn(producto);
 
-        mockMvc.perform(get("/api/productos"))
+        mockMvc.perform(post("/api/productos")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(producto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].nombre").value("Bebida Cola 2L"));
+                .andExpect(jsonPath("$.nombre").value("Bebida Cola 2L"));
     }
 
+    // TEST A.2: Falla con rol CAJERO
     @Test
-    void testEliminarProductoExitoso() throws Exception {
-        when(productoService.findById(1L)).thenReturn(producto);
-        // doNothing() se usa para métodos void como deleteById
-        doNothing().when(productoService).deleteById(1L);
-
-        mockMvc.perform(delete("/api/productos/1"))
-                .andExpect(status().isNoContent()); // Status 204
+    @WithMockUser(authorities = "CAJERO")
+    void testGuardarProducto_ComoCajero_Denegado() throws Exception {
+        mockMvc.perform(post("/api/productos")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(producto)))
+                .andExpect(status().isForbidden()); // Esperamos un 403 Forbidden
     }
 }

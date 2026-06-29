@@ -1,33 +1,41 @@
 package com.minimarket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.minimarket.controller.CarritoController;
 import com.minimarket.entity.Carrito;
+import com.minimarket.security.config.SecurityConfig;
+import com.minimarket.security.service.CustomUserDetailsService;
 import com.minimarket.service.CarritoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.minimarket.controller.CarritoController;
 import java.util.Arrays;
-
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(CarritoController.class)
-@AutoConfigureMockMvc(addFilters = false) // Mantenemos la seguridad apagada para la prueba
+@AutoConfigureMockMvc
+@Import(SecurityConfig.class)
+@WithMockUser(authorities = "CLIENTE")
 public class CarritoControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private CarritoService carritoService;
+
+    @MockitoBean
+    private CustomUserDetailsService customUserDetailsService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -52,7 +60,6 @@ public class CarritoControllerTest {
 
     @Test
     void testObtenerCarritoPorId_NoEncontrado() throws Exception {
-        // Probamos la rama lógica negativa (Branch Coverage)
         when(carritoService.findById(99L)).thenReturn(null);
 
         mockMvc.perform(get("/api/carrito/99"))

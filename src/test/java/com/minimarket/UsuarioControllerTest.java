@@ -7,10 +7,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import com.minimarket.security.config.SecurityConfig;
+import com.minimarket.security.service.CustomUserDetailsService;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.Optional;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.minimarket.controller.UsuarioController;
 
 import static org.mockito.Mockito.*;
@@ -18,15 +24,23 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UsuarioController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
+@Import(SecurityConfig.class)
+@WithMockUser(authorities = "ADMIN") // <-- Simulamos que un ADMIN maneja a los usuarios
 public class UsuarioControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private UsuarioService usuarioService;
 
+    @MockitoBean
+    private CustomUserDetailsService customUserDetailsService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+    
     private Usuario usuario;
 
     @BeforeEach

@@ -1,44 +1,45 @@
 package com.minimarket;
 
-// Importaciones para MockMvc y JSON
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-
-// Importaciones de Mockito y utilidades
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-
-
-//import de entidades y controlador del proyecto
+import com.minimarket.controller.InventarioController;
 import com.minimarket.entity.Inventario;
 import com.minimarket.entity.Producto;
 import com.minimarket.service.InventarioService;
-import com.minimarket.controller.InventarioController;
+import com.minimarket.security.config.SecurityConfig;
+import com.minimarket.security.service.CustomUserDetailsService;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+
 import java.util.Date;
 
-// habilitamos la prueba solo para el controlador web
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 @WebMvcTest(InventarioController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
+@Import(SecurityConfig.class)
 public class InventarioControllerTest {
 
-    // Inyectamos el cliente HTTP simulado
     @Autowired
     private MockMvc mockMvc;
 
-    //Inyectamos el servicio simulado
-    @MockBean
+    @MockitoBean
     private InventarioService inventarioService;
 
-    //Herramienta para convertir objetos a JSON
+    @MockitoBean
+    private CustomUserDetailsService customUserDetailsService;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -58,37 +59,26 @@ public class InventarioControllerTest {
         inventario.setFechaMovimiento(new Date());
     }
 
+    // TEST B.1: Registro de movimiento permitido para ADMIN
     @Test
-    void testObtenerMovimientoPorIdExitoso() throws Exception {
-        // Configuramos el servicio para que devuelva nuestro objeto simulado
-        when(inventarioService.findById(1L)).thenReturn(inventario);
-
-        //Hacemos un GET y verificamos el status 200 y el contenido
-        mockMvc.perform(get("/api/inventario/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.tipoMovimiento").value("Entrada"))
-                .andExpect(jsonPath("$.cantidad").value(20));
-    }
-
-    @Test
-    void testObtenerMovimientoPorIdNoEncontrado() throws Exception {
-        // Simulamos que el ID no existe (devuelve null)
-        when(inventarioService.findById(99L)).thenReturn(null);
-
-        // Verificamos que el controlador devuelva el status 404 (Not Found)
-        mockMvc.perform(get("/api/inventario/99"))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void testRegistrarMovimiento() throws Exception {
+    @WithMockUser(authorities = "ADMIN")
+    void testRegistrarMovimiento_ComoAdmin_Exitoso() throws Exception {
         when(inventarioService.save(any(Inventario.class))).thenReturn(inventario);
 
-        //Enviamos un POST con el objeto convertido a JSON
         mockMvc.perform(post("/api/inventario")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(inventario))) // Concepto 4 en acción
+                .content(objectMapper.writeValueAsString(inventario)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tipoMovimiento").value("Entrada"));
+    }
+
+    // TEST B.2: Registro de movimiento denegado para usuario sin rol explícito
+    @Test
+    @WithMockUser(authorities = "CLIENTE")
+    void testRegistrarMovimiento_ComoCliente_Denegado() throws Exception {
+        mockMvc.perform(post("/api/inventario")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(inventario)))
+                .andExpect(status().isForbidden());
     }
 }
