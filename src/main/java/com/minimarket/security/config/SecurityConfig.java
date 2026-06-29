@@ -5,12 +5,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity; // <-- Nueva importación
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableMethodSecurity // <-- Habilita @PreAuthorize en nuestros controladores
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
@@ -22,14 +24,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Deshabilita CSRF con la nueva sintaxis
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/public/**").permitAll() // Permitir acceso público
-                        .anyRequest().authenticated() // Requiere autenticación para el resto
+                        .requestMatchers("/public/**", "/api/auth/login").permitAll() // <-- Agregamos el endpoint de login
+                        .anyRequest().authenticated()
                 )
-                .formLogin(form -> form
-                        .defaultSuccessUrl("/public/hola", true) // Redirigir después del login
-                )
+                // Deshabilite temporalmente el formLogin por defecto para enfocarme en la API REST
+                /* .formLogin(form -> form
+                        .defaultSuccessUrl("/public/hola", true)
+                ) */
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/public/hola")
@@ -45,6 +48,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // Configuración de encriptación de contraseñas
+        return new BCryptPasswordEncoder();
     }
 }
