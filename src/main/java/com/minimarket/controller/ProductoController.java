@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize; // <-- Nueva importación
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -29,13 +30,13 @@ public class ProductoController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN')") // <-- Solo ADMIN puede crear
-    public Producto guardarProducto(@RequestBody Producto producto) {
+    public Producto guardarProducto(@Valid @RequestBody Producto producto) {
         return productoService.save(producto);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')") // <-- Solo ADMIN puede editar
-    public ResponseEntity<Producto> actualizarProducto(@PathVariable Long id, @RequestBody Producto producto) {
+    public ResponseEntity<Producto> actualizarProducto(@Valid@PathVariable Long id, @RequestBody Producto producto) {
         Producto productoExistente = productoService.findById(id);
         if (productoExistente != null) {
             producto.setId(id);

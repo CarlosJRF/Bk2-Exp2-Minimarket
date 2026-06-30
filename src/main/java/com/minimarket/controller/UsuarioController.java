@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -29,7 +30,7 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public Usuario guardarUsuario(@RequestBody Usuario usuario) {
+    public Usuario guardarUsuario(@Valid @RequestBody Usuario usuario) {
         return usuarioService.save(usuario);
     }
 

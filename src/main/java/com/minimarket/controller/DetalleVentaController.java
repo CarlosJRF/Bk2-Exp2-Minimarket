@@ -5,6 +5,7 @@ import com.minimarket.service.DetalleVentaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -27,12 +28,12 @@ public class DetalleVentaController {
     }
 
     @PostMapping
-    public DetalleVenta guardarDetalleVenta(@RequestBody DetalleVenta detalleVenta) {
+    public DetalleVenta guardarDetalleVenta(@Valid@RequestBody DetalleVenta detalleVenta) {
         return detalleVentaService.save(detalleVenta);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<DetalleVenta> actualizarDetalleVenta(@PathVariable Long id, @RequestBody DetalleVenta detalleVenta) {
+    public ResponseEntity<DetalleVenta> actualizarDetalleVenta(@Valid @PathVariable Long id, @RequestBody DetalleVenta detalleVenta) {
         DetalleVenta existente = detalleVentaService.findById(id);
         if (existente != null) {
             detalleVenta.setId(id);

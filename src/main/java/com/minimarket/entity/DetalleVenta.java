@@ -1,6 +1,7 @@
 package com.minimarket.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 
 @Entity
 public class DetalleVenta {
@@ -16,9 +17,11 @@ public class DetalleVenta {
     @JoinColumn(name = "producto_id", nullable = false)
     private Producto producto;
 
+    @Min(value = 1, message = "La cantidad debe ser al menos 1")
     @Column(nullable = false)
     private Integer cantidad;
 
+    @DecimalMin(value = "0.0", inclusive = true, message = "El precio debe ser mayor o igual a 0")
     @Column(nullable = false)
     private Double precio;
 

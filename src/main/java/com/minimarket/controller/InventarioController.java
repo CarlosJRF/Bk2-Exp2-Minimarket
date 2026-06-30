@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class InventarioController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')") // <-- Solo ADMIN puede actualizar movimientos
-    public ResponseEntity<Inventario> actualizarMovimiento(@PathVariable Long id, @RequestBody Inventario inventario) {
+    public ResponseEntity<Inventario> actualizarMovimiento(@Valid @PathVariable Long id, @RequestBody Inventario inventario) {
         Inventario existente = inventarioService.findById(id);
         if (existente != null) {
             inventario.setId(id);

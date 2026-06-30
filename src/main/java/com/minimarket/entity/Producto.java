@@ -1,6 +1,7 @@
 package com.minimarket.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 
 @Entity
 public class Producto {
@@ -9,11 +10,16 @@ public class Producto {
     private Long id;
 
     @Column(nullable = false)
+    @NotBlank(message = "El nombre del producto no puede estar vacío")  
     private String nombre;
 
+    @NotNull(message = "El precio del producto no puede estar vacío")
+    @DecimalMin(value = "0.0", inclusive = false, message = "El precio del producto debe ser mayor que cero")   
     @Column(nullable = false)
     private Double precio;
 
+    @NotNull(message = "El stock del producto no puede estar vacío")
+    @Min(value = 0, message = "El stock del producto no puede ser negativo")
     @Column(nullable = false)
     private Integer stock;
 

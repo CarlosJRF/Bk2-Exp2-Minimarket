@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class) // Usamos Mockito puro para probar servicios
+@ExtendWith(MockitoExtension.class) 
 public class DetalleVentaServiceImplTest {
 
     @Mock

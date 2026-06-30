@@ -1,6 +1,7 @@
 package com.minimarket.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.util.List;
 
 @Entity
@@ -9,6 +10,7 @@ public class Categoria {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "El nombre de la categoría no puede estar vacío")   
     @Column(nullable = false, unique = true)
     private String nombre;
 

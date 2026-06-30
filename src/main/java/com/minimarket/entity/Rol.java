@@ -1,6 +1,7 @@
 package com.minimarket.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.util.Set;
 
 @Entity
@@ -10,6 +11,7 @@ public class Rol {
     private Long id;
 
     @Column(nullable = false, unique = true)
+    @NotBlank(message = "El nombre del rol no puede estar vacío")   
     private String nombre;
 
     @ManyToMany(mappedBy = "roles")

@@ -5,6 +5,7 @@ import com.minimarket.service.CarritoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class CarritoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Carrito> actualizarCarrito(@PathVariable Long id, @RequestBody Carrito carrito) {
+    public ResponseEntity<Carrito> actualizarCarrito(@Valid @PathVariable Long id, @RequestBody Carrito carrito) {
         Carrito existente = carritoService.findById(id);
         if (existente != null) {
             carrito.setId(id);

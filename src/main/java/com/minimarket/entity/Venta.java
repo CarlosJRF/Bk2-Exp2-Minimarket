@@ -1,6 +1,7 @@
 package com.minimarket.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.util.Date;
 import java.util.List;
 
@@ -14,6 +15,7 @@ public class Venta {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
+    @NotNull(message = "La fecha de la venta no puede estar vacía") 
     @Column(nullable = false)
     private Date fecha;
 

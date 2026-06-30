@@ -23,7 +23,6 @@ import com.minimarket.service.impl.InventarioServiceImpl;
 
 import java.util.Date;
 
-//Habilitar Mockito en JUnit 5
 @ExtendWith(MockitoExtension.class)
 public class InventarioServiceImplTest {
 

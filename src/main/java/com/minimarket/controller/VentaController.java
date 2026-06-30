@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/ventas")
@@ -29,7 +30,7 @@ public class VentaController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('CAJERO')") // <-- Solo CAJERO puede registrar ventas
-    public Venta guardarVenta(@RequestBody Venta venta) {
+    public Venta guardarVenta(@Valid @RequestBody Venta venta) {
         return ventaService.save(venta);
     }
 }

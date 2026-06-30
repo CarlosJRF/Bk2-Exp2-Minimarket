@@ -119,7 +119,7 @@ public class ProductoControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    // Pruebas Originales de Seguridad
+
     @Test
     void testGuardarProducto_ComoAdmin_Exitoso() throws Exception {
         when(productoService.save(any(Producto.class))).thenReturn(producto);
