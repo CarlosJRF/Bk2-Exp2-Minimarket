@@ -26,13 +26,15 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/public/**", "/api/auth/login").permitAll() // <-- Agregamos el endpoint de login
+                        .requestMatchers(
+                            "/public/**",
+                                         "/api/auth/login",
+                                        "/v3/api-docs/**",
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html").permitAll() // <-- Agregamos el endpoint de login y de swagger
                         .anyRequest().authenticated()
                 )
-                // Deshabilite temporalmente el formLogin por defecto para enfocarme en la API REST
-                /* .formLogin(form -> form
-                        .defaultSuccessUrl("/public/hola", true)
-                ) */
+                
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/public/hola")
