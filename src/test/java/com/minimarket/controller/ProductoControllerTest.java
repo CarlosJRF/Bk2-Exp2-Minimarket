@@ -1,7 +1,6 @@
 package com.minimarket.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.minimarket.controller.ProductoController;
 import com.minimarket.entity.Producto;
 import com.minimarket.security.config.SecurityConfig;
 import com.minimarket.security.service.CustomUserDetailsService;
@@ -53,14 +52,15 @@ public class ProductoControllerTest {
         producto.setStock(100);
     }
 
-    // Pruebas Nuevas de Cobertura
     @Test
     void testListarProductos() throws Exception {
         when(productoService.findAll()).thenReturn(Arrays.asList(producto));
 
         mockMvc.perform(get("/api/productos"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].nombre").value("Bebida Cola 2L"));
+                // Validación HAL para colecciones en _embedded
+                .andExpect(jsonPath("$._embedded.productoList[0].nombre").value("Bebida Cola 2L"))
+                .andExpect(jsonPath("$._links.self.href").exists());
     }
 
     @Test
@@ -69,7 +69,11 @@ public class ProductoControllerTest {
 
         mockMvc.perform(get("/api/productos/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.precio").value(2500.0));
+                .andExpect(jsonPath("$.precio").value(2500.0))
+                // Validación de hipermedia HATEOAS
+                .andExpect(jsonPath("$._links.self.href").exists())
+                .andExpect(jsonPath("$._links.productos.href").exists())
+                .andExpect(jsonPath("$._links.inventario.href").exists());
     }
 
     @Test
@@ -89,7 +93,8 @@ public class ProductoControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(producto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nombre").value("Bebida Cola 2L"));
+                .andExpect(jsonPath("$.nombre").value("Bebida Cola 2L"))
+                .andExpect(jsonPath("$._links.self.href").exists());
     }
 
     @Test
@@ -119,7 +124,6 @@ public class ProductoControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-
     @Test
     void testGuardarProducto_ComoAdmin_Exitoso() throws Exception {
         when(productoService.save(any(Producto.class))).thenReturn(producto);
@@ -127,11 +131,12 @@ public class ProductoControllerTest {
         mockMvc.perform(post("/api/productos")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(producto)))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._links.self.href").exists());
     }
 
     @Test
-    @WithMockUser(authorities = "CAJERO") // Sobrescribe el rol a Cajero
+    @WithMockUser(authorities = "CAJERO")
     void testGuardarProducto_ComoCajero_Denegado() throws Exception {
         mockMvc.perform(post("/api/productos")
                 .contentType(MediaType.APPLICATION_JSON)
