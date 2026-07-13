@@ -17,8 +17,18 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        System.out.println(">>> [DEBUG SECURITY] Postman intentando loguear con el usuario: '" + username + "'");
+
         Usuario usuario = usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
+                .orElseThrow(() -> {
+                    System.out.println(">>> [DEBUG ERROR] ¡El usuario '" + username + "' NO EXISTE en la tabla USUARIO de H2!");
+                    return new UsernameNotFoundException("Usuario no encontrado: " + username);
+                });
+
+        System.out.println(">>> [DEBUG ÉXITO] ¡Usuario '" + username + "' encontrado en BD!");
+        System.out.println(">>> [DEBUG DATOS] Contraseña encriptada en BD: " + usuario.getPassword());
+        System.out.println(">>> [DEBUG DATOS] Roles asignados: " + usuario.getRoles());
+
         return new CustomUserDetails(usuario);
     }
 }

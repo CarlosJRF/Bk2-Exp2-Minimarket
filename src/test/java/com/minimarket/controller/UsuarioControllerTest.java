@@ -1,7 +1,6 @@
 package com.minimarket.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.minimarket.controller.UsuarioController;
 import com.minimarket.entity.Usuario;
 import com.minimarket.security.config.SecurityConfig;
 import com.minimarket.security.service.CustomUserDetailsService;
@@ -59,16 +58,23 @@ public class UsuarioControllerTest {
 
         mockMvc.perform(get("/api/usuarios"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].username").value("admin"));
+                // Validación HAL para usuarioList en _embedded
+                .andExpect(jsonPath("$._embedded.usuarioList[0].username").value("admin"))
+                .andExpect(jsonPath("$._links.self.href").exists());
     }
 
     @Test
     void testObtenerUsuarioPorId_Encontrado() throws Exception {
-        when(usuarioService.findById(1L)).thenReturn(Optional.of(usuario)); // Uso de Optional
+        when(usuarioService.findById(1L)).thenReturn(Optional.of(usuario));
 
         mockMvc.perform(get("/api/usuarios/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("admin"));
+                .andExpect(jsonPath("$.username").value("admin"))
+                // Validación de enlaces HATEOAS cruzados
+                .andExpect(jsonPath("$._links.self.href").exists())
+                .andExpect(jsonPath("$._links.usuarios.href").exists())
+                .andExpect(jsonPath("$._links.carritos.href").exists())
+                .andExpect(jsonPath("$._links.ventas.href").exists());
     }
 
     @Test
@@ -87,7 +93,8 @@ public class UsuarioControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(usuario)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1));
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$._links.self.href").exists());
     }
 
     @Test
@@ -99,7 +106,8 @@ public class UsuarioControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(usuario)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("admin"));
+                .andExpect(jsonPath("$.username").value("admin"))
+                .andExpect(jsonPath("$._links.self.href").exists());
     }
 
     @Test

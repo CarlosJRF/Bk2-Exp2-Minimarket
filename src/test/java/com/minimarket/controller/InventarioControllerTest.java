@@ -1,7 +1,6 @@
 package com.minimarket.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.minimarket.controller.InventarioController;
 import com.minimarket.entity.Inventario;
 import com.minimarket.entity.Producto;
 import com.minimarket.security.config.SecurityConfig;
@@ -60,14 +59,15 @@ public class InventarioControllerTest {
         inventario.setFechaMovimiento(new Date());
     }
 
-    // Pruebas Nuevas de Cobertura
     @Test
     void testListarMovimientosDeInventario() throws Exception {
         when(inventarioService.findAll()).thenReturn(Arrays.asList(inventario));
 
         mockMvc.perform(get("/api/inventario"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].cantidad").value(20));
+                // Validación HAL para inventarioList en _embedded
+                .andExpect(jsonPath("$._embedded.inventarioList[0].cantidad").value(20))
+                .andExpect(jsonPath("$._links.self.href").exists());
     }
 
     @Test
@@ -76,7 +76,9 @@ public class InventarioControllerTest {
 
         mockMvc.perform(get("/api/inventario/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.tipoMovimiento").value("Entrada"));
+                .andExpect(jsonPath("$.tipoMovimiento").value("Entrada"))
+                .andExpect(jsonPath("$._links.self.href").exists())
+                .andExpect(jsonPath("$._links.inventario.href").exists());
     }
 
     @Test
@@ -96,7 +98,8 @@ public class InventarioControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(inventario)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.cantidad").value(20));
+                .andExpect(jsonPath("$.cantidad").value(20))
+                .andExpect(jsonPath("$._links.self.href").exists());
     }
 
     @Test
@@ -126,7 +129,6 @@ public class InventarioControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    // Pruebas Originales de Seguridad
     @Test
     void testRegistrarMovimiento_ComoAdmin_Exitoso() throws Exception {
         when(inventarioService.save(any(Inventario.class))).thenReturn(inventario);
@@ -134,11 +136,12 @@ public class InventarioControllerTest {
         mockMvc.perform(post("/api/inventario")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(inventario)))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._links.self.href").exists());
     }
 
     @Test
-    @WithMockUser(authorities = "CLIENTE") // Sobrescribe el rol de la clase
+    @WithMockUser(authorities = "CLIENTE")
     void testRegistrarMovimiento_ComoCliente_Denegado() throws Exception {
         mockMvc.perform(post("/api/inventario")
                 .contentType(MediaType.APPLICATION_JSON)

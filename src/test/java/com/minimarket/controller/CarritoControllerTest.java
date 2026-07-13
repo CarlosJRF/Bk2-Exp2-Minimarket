@@ -1,7 +1,6 @@
 package com.minimarket.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.minimarket.controller.CarritoController;
 import com.minimarket.entity.Carrito;
 import com.minimarket.security.config.SecurityConfig;
 import com.minimarket.security.service.CustomUserDetailsService;
@@ -55,7 +54,9 @@ public class CarritoControllerTest {
 
         mockMvc.perform(get("/api/carrito"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].cantidad").value(5));
+                // Validación HAL para carritoList en _embedded
+                .andExpect(jsonPath("$._embedded.carritoList[0].cantidad").value(5))
+                .andExpect(jsonPath("$._links.self.href").exists());
     }
 
     @Test
