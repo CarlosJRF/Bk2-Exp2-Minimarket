@@ -1,5 +1,6 @@
 package com.minimarket.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore; // <-- Nueva importación de Jackson
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.util.List;
@@ -14,6 +15,7 @@ public class Categoria {
     @Column(nullable = false, unique = true)
     private String nombre;
 
+    @JsonIgnore // <-- ¡ESTA ANOTACIÓN CORTA EL BUCLE DE SERIALIZACIÓN INFINITA!
     @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Producto> productos;
 
@@ -38,5 +40,7 @@ public class Categoria {
         return productos;
     }
 
-    
+    public void setProductos(List<Producto> productos) {
+        this.productos = productos;
+    }
 }
